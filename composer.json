@@ -20,7 +20,6 @@
             "BorysZielonka\\ClientStoreProductBundle\\": ""
         }
     },
-    "target-dir": "BorysZielonka/ClientStoreProductBundle",
     "extra": {
         "branch-alias": {
             "dev-master": "1"
