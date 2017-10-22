@@ -1,0 +1,40 @@
+{% extends "BorysZielonka\ClientStoreProductBundle::base.html.twig" %}
+
+{% block title %}BorysZielonkaClientStoreProductBundle:Product:index{% endblock %}
+
+{% block body %}
+    <h1>Product list</h1>
+    <a href="{{ path('product_index', {'moreThanAmount': 5}) }}" class="btn btn-primary btn-sm">More than 5</a>
+    <a href="{{ path('product_index', {'inStock': 1}) }}" class="btn btn-primary btn-sm">In Stock</a>
+    <a href="{{ path('product_index', {'inStock': 0}) }}" class="btn btn-primary btn-sm">Out Of Stock</a>
+    <a href="{{ path('product_add') }}" class="btn btn-default pull-right">Add new product</a>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Amount</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in products %}
+                <tr>
+                    <td>{{ product.id }}</td>
+                    <td>{{ product.name }}</td>
+                    <td>{{ product.amount }}</td>
+                    <td>
+                        <ul>
+                            <li>
+                                <a href="{{ path('product_edit', { 'id': product.id }) }}">edit</a>
+                            </li>
+                            <li>
+                                <a href="{{ path('product_delete', { 'id': product.id }) }}">delete</a>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

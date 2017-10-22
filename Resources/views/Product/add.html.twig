@@ -1,0 +1,15 @@
+{% extends "BorysZielonka\ClientStoreProductBundle::base.html.twig" %}
+
+{% block title %}BorysZielonkaClientStoreProductBundle:Product:add{% endblock %}
+
+{% block body %}
+    <h1>New product</h1>
+    {{ form_start(form, {attr: {'novalidate':'novalidate'}}) }}
+    {{ form_widget(form) }}
+    <input type="submit" value="Add" />
+    {{ form_end(form) }}
+
+
+    <a href="{{ path('product_index') }}" class="btn btn-default">Back</a>
+
+{% endblock %}
