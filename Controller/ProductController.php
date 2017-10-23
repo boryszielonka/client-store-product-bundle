@@ -3,48 +3,55 @@ namespace BorysZielonka\ClientStoreProductBundle\Controller;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
-use GuzzleHttp\Psr7\Request;
-use GuzzleHttp\Psr7\Response;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Component\HttpFoundation\Request as Request2;
-use function GuzzleHttp\json_decode;
-use function GuzzleHttp\Psr7\str;
+use Symfony\Component\HttpFoundation\Request;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 
 class ProductController extends Controller
 {
 
-    const API_URI = 'http://localhost:8000/api/product/';
+    /**
+     * 
+     * @return mixed
+     */
+    private function getApiStoreUri()
+    {
+        return
+            $this->container->getParameter('borys_zielonka_client_store_product.api_store_uri');
+    }
 
     /**
      * @Route("/", name="product_index")
+     * @Template()
+     * @param Request $request
+     * @return array
      */
-    public function indexAction(Request2 $request)
+    public function indexAction(Request $request)
     {
         $query = http_build_query([
             'moreThanAmount' => $request->get('moreThanAmount'),
             'inStock' => $request->get('inStock')
         ]);
-        
+
         $client = new Client();
-        $response = $client->get(self::API_URI.'?'.$query);
+        $response = $client->get($this->getApiStoreUri() . '?' . $query);
 
         $products = json_decode($response->getBody()->getContents());
 
-        return $this->render('BorysZielonkaClientStoreProductBundle:Product:index.html.twig', array(
-                'products' => $products
-        ));
+        return ['products' => $products];
     }
 
     /**
      * 
      * @Route("/add", name="product_add")
+     * @Template()
      * @Method({"GET", "POST"})
-     * @param Request2 $request
-     * @return type
+     * @param Request $request
+     * @return array | RedirectResponse
      */
-    public function addAction(Request2 $request)
+    public function addAction(Request $request)
     {
         $form = $this->createForm('BorysZielonka\ClientStoreProductBundle\Form\ProductType');
         $form->handleRequest($request);
@@ -53,34 +60,33 @@ class ProductController extends Controller
         if ($form->isSubmitted() && $form->isValid()) {
             try {
                 // 'form_params' bo application/x-www-form-urlencoded
-                $client->post(self::API_URI, ['form_params' => $form->getData()]);
+                $client->post($this->getApiStoreUri(), ['form_params' => $form->getData()]);
                 $this->addFlash('success', 'Product added!');
                 return $this->redirectToRoute('product_index');
             } catch (RequestException $e) {
-                $this->addFlash('warning', 'Product hasn\'t been added');
+                $this->addFlash('warning', 'Product hasn\'t been added. Error Code:' . $e->getCode());
             }
         }
 
-        return $this->render('BorysZielonkaClientStoreProductBundle:Product:add.html.twig', array(
-                'form' => $form->createView(),
-        ));
+        return ['form' => $form->createView()];
     }
 
     /**
      * 
      * @Route("/edit/{id}", name="product_edit")
+     * @Template()
      * @param type $id
-     * @param Request2 $request
-     * @return type
+     * @param Request $request
+     * @return array | RedirectResponse
      */
-    public function editAction($id, Request2 $request)
+    public function editAction($id, Request $request)
     {
         $client = new Client();
         try {
-            $response = $client->get(self::API_URI . $id);
+            $response = $client->get($this->getApiStoreUri() . $id);
             $productData = json_decode($response->getBody()->getContents());
         } catch (RequestException $e) {
-            $this->addFlash('warning', 'No product');
+            $this->addFlash('warning', 'No product. Error Code:' . $e->getCode());
             return $this->redirectToRoute('product_index');
         }
 
@@ -90,33 +96,32 @@ class ProductController extends Controller
         if ($editForm->isSubmitted() && $editForm->isValid()) {
             try {
                 // 'form_params' bo application/x-www-form-urlencoded
-                $client->put(self::API_URI . $id, ['form_params' => $editForm->getData()]);
+                $client->put($this->getApiStoreUri() . $id, ['form_params' => $editForm->getData()]);
                 $this->addFlash('success', 'Product added!');
                 return $this->redirectToRoute('product_index');
             } catch (RequestException $e) {
-                $this->addFlash('warning', 'Product hasn\'t been added');
+                $this->addFlash('warning', 'Product hasn\'t been added. Error Code:' . $e->getCode());
             }
         }
 
-        return $this->render('BorysZielonkaClientStoreProductBundle:Product:edit.html.twig', array(
-                'edit_form' => $editForm->createView(),
-        ));
+        return ['edit_form' => $editForm->createView()];
     }
 
     /**
+     * 
      * @Route("/delete/{id}", name="product_delete")
      * @param type $id
-     * @return type
+     * @return RedirectResponse
      */
     public function deleteAction($id)
     {
         $client = new Client();
 
         try {
-            $client->delete(self::API_URI . $id);
+            $client->delete($this->getApiStoreUri() . $id);
             $this->addFlash('success', 'Product removed!');
         } catch (RequestException $e) {
-            $this->addFlash('warning', 'Product hasn\'t been removed');
+            $this->addFlash('warning', 'Product hasn\'t been removed . Error Code:' . $e->getCode());
         }
 
         return $this->redirectToRoute('product_index');
