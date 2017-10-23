@@ -1,11 +1,16 @@
-AppKernel
-```
+app/AppKernel.php
+```php
 new BorysZielonka\ClientStoreProductBundle\BorysZielonkaClientStoreProductBundle()
 ```
 
-
-routing
+app/config/config.yml
+```yml
+borys_zielonka_client_store_product:
+    api_store_uri: '{API_STORE_URI}'
 ```
+
+app/config/routing.yml
+```yml
     borys_zielonka_client_store_product:
     resource: "@BorysZielonkaApiStoreProductBundle/Controller/"
     type:     annotation
