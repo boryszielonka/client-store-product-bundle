@@ -36,7 +36,13 @@ class ProductController extends Controller
         ]);
 
         $client = new Client();
-        $response = $client->get($this->getApiStoreUri() . '?' . $query);
+
+        try {
+            $response = $client->get($this->getApiStoreUri() . '?' . $query);
+        } catch (RequestException $e) {
+            $this->addFlash('warning', 'Invalid parameters. Error Code:' . $e->getCode());
+            return $this->redirectToRoute('product_index');
+        }
 
         $products = json_decode($response->getBody()->getContents());
 
